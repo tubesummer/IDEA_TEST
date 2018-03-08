@@ -16,6 +16,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.http.HttpResponse;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -42,7 +43,7 @@ public class SynchronizeProjectRole {
 	 * @param projectKey
 	 * @return Map 集合
 	 */
-	public Map<String, String> getRolesByProjectKey(String JiraHost,String projectKey){
+	public static Map<String, String> getRolesByProjectKey(String JiraHost,String projectKey){
 		
 		Map<String, String> projectRolesList = new HashMap<String,String>();
 		String key = null;
@@ -117,7 +118,7 @@ public class SynchronizeProjectRole {
 	 * @param projectRoelsList 项目中的roles列表
 	 * @return
 	 */
-	public Map<String, List<Map<String, String>>> getAllUsersFromProjectRoles(Map<String, String> projectRoelsList){
+	public static Map<String, List<Map<String, String>>> getAllUsersFromProjectRoles(Map<String, String> projectRoelsList){
 		
 		Map<String, List<Map<String, String>>> allUsersFromProjectRoles = new HashMap<>();
 		//存放用户列表
@@ -160,7 +161,7 @@ public class SynchronizeProjectRole {
 						for (int i = 0; i < jsonArray.length(); i++) {
 							role = new HashMap<String,String>();
 							JSONObject roleJsonObject = jsonArray.getJSONObject(i);
-							role.put(roleJsonObject.getString("type"), roleJsonObject.getString("name"));
+							role.put( roleJsonObject.getString("name"),roleJsonObject.getString("type"));
 							users.add(role);							
 						}						
 					}					
@@ -191,61 +192,84 @@ public class SynchronizeProjectRole {
 	}
 	
 	
-	public boolean addUsersToProjectRoles(Map<String, List<Map<String, String>>> users,String destinationProjectKey){
+	public static boolean addUsersToProjectRoles(Map<String, List<Map<String, String>>> users,String JIRAHost,String destinationProjectKey){
 		
 		boolean flag = false;
+		//获取目标项目中的所有的project roles及其rest URL列表
+		Map<String, String> DestinationProjectRoles = getRolesByProjectKey(JIRAHost,destinationProjectKey);
 		
+		//遍历参数中传入的project role的用户列表
 		Set<Entry<String, List<Map<String, String>>>> usersSet = users.entrySet();
 		Iterator<Entry<String, List<Map<String, String>>>> usersIterator = usersSet.iterator();
 		String role = null;
+		List<Map<String, String>> usersFromRole = null;
+		String destinationRestUrl = null;
 		while (usersIterator.hasNext()) {
-			role = usersIterator.next().getKey();
 			
+			Entry<String, List<Map<String, String>>> mEntry = usersIterator.next();
+			
+			usersFromRole = mEntry.getValue();
+			//判断当前role中是否有用户
+			if (usersFromRole.size() != 0) {
+				role = mEntry.getKey();
+				
+				System.out.println(role);
+				destinationRestUrl = DestinationProjectRoles.get(role);
+				//如果存在用户遍历加入
+				for (int i = 0; i < usersFromRole.size(); i++) {
+					Map<String, String> userOrGroup = usersFromRole.get(i);
+					
+					System.out.println(userOrGroup);
+					//判断存放的是user还是group
+					Set<Map.Entry<String, String>> set = userOrGroup.entrySet();
+					Iterator<Entry<String, String>> iterator = set.iterator();
+					String type = null;
+					String usernameOrGroupname = null;
+					String postJSONString = null;
+					while (iterator.hasNext()) {
+						Entry<String, String> entry = iterator.next(); 
+						
+						type = entry.getValue();
+						usernameOrGroupname = entry.getKey();						
+					}
+					
+					System.out.println(type);
+					
+					System.out.println("atlassian-user-role-actor".equals(type));
+					
+					//拼接postJasonString
+					if ("atlassian-user-role-actor".equals(type)) {
+						postJSONString = "{ \"user\" : [\""+usernameOrGroupname+"\"] }";	
+					}else if ("atlassian-group-role-actor".equals(type)) {
+						postJSONString = "{ \"group\" : [\""+usernameOrGroupname+"\"] }";
+					}
+					System.out.println("postJSONString----->"+postJSONString);
+					System.out.println(destinationRestUrl);
+					
+					if (postJSONString != null && destinationRestUrl != null) {
+						HttpResponse httpResponse = HttpMethod.getPostMethodWithAuthorPostJson(CDCADMIN, CDC_PWD, destinationRestUrl, postJSONString);
+						
+						
+						
+						System.out.println(usernameOrGroupname+"加入的状态:  "+httpResponse.getStatusLine().getStatusCode());
+					}
+				}
+			}
 		}
-		
-		
-		
 		return flag;
-		
 	}
 	
 	
 	
 	public static void main(String[] args) {
 		
-		 SynchronizeProjectRole synchronizeProjectRole = new SynchronizeProjectRole();
 		 
-		 Map<String, String> projectRolesList = synchronizeProjectRole.getRolesByProjectKey(JIRA_INT,"RDTH");
+		 Map<String, String> projectRolesList = SynchronizeProjectRole.getRolesByProjectKey(JIRA_INT,"SWT");
 		 
-		 Map<String, List<Map<String, String>>> allUsersFromProjectRoles = synchronizeProjectRole.getAllUsersFromProjectRoles(projectRolesList);
+		 Map<String, List<Map<String, String>>> allUsersFromProjectRoles = SynchronizeProjectRole.getAllUsersFromProjectRoles(projectRolesList);
 		 
-		 Set<Map.Entry<String, List<Map<String, String>>>> sEntries = allUsersFromProjectRoles.entrySet();
-		 
-		 Iterator<Entry<String, List<Map<String, String>>>> iterator = sEntries.iterator();
-		 
-		 while (iterator.hasNext()) {
-			
-			 Map.Entry<String, List<Map<String, String>>> mEntry = iterator.next();
-			 
-			 String key = mEntry.getKey();
-			 System.out.println("Project Role:  "+key);
-			 
-			 List<Map<String, String>> users = mEntry.getValue();
-			 
-			 System.out.println(users);
-			 
-			 
-			 for (int i = 0; i < users.size(); i++) {
-				
-				 Map<String, String> user = users.get(i);
-				 
-				 System.out.println(user);
-				 
-				 
-			}
-		}
+		 addUsersToProjectRoles(allUsersFromProjectRoles, JIRA_INT, "RDTH");
 		
-
 	}
 	
 	
