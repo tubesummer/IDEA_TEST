@@ -24,19 +24,19 @@ public class BaseHttpDomain {
 	
 	private HttpClient client;
     private GetMethod method;
-    private HttpClientBuilder httpClientBuilder;
+    private static HttpClientBuilder httpClientBuilder;
     private CloseableHttpClient closeableHttpClient;
     private HttpPost httpPost;
     private HttpPut httpPut;
     private HttpDelete httpDelete;
     
-    public HttpClientBuilder getHttpClientBuilder() {
+    public static HttpClientBuilder getHttpClientBuilder() {
     	httpClientBuilder = HttpClientBuilder.create();
         return httpClientBuilder;
     }
     
     public CloseableHttpClient getCloseableHttpClient(){
-    	closeableHttpClient = httpClientBuilder.build();
+    	closeableHttpClient = getHttpClientBuilder().build();
     	return closeableHttpClient;
     }
     
@@ -102,7 +102,6 @@ public class BaseHttpDomain {
         String auth = new String(Base64.encodeBase64((AuthorName + ":" + AuthorPassword).getBytes()));
         httpPut.setHeader(HttpHander.TOKEN, HttpHander.CHECK);
         httpPut.setHeader(HttpHander.AUTHO, HttpHander.BASIC + auth);
-//      MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
         StringEntity params = null;
         try {
             params = new StringEntity(postJSONString);
