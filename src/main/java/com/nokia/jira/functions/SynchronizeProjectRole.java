@@ -191,12 +191,19 @@ public class SynchronizeProjectRole {
 		return allUsersFromProjectRoles;
 	}
 	
-	
-	public static boolean addUsersToProjectRoles(Map<String, List<Map<String, String>>> users,String JIRAHost,String destinationProjectKey){
+	/**
+	 * 将某个环境中某个项目的roles同步到指定环境的指定project role中
+	 * @param sourceJIRAHOST 源环境
+	 * @param sourceProjectKey 源项目
+	 * @param destinationJITAHOST 目标环境
+	 * @param destinationProjectKey 目标项目
+	 */
+	public static void addUsersToProjectRoles(String sourceJIRAHOST,String sourceProjectKey,String destinationJITAHOST,String destinationProjectKey){
 		
-		boolean flag = false;
 		//获取目标项目中的所有的project roles及其rest URL列表
-		Map<String, String> DestinationProjectRoles = getRolesByProjectKey(JIRAHost,destinationProjectKey);
+		Map<String, String> DestinationProjectRoles = getRolesByProjectKey(destinationJITAHOST,destinationProjectKey);
+		
+		Map<String, List<Map<String, String>>> users = getAllUsersFromProjectRoles(getRolesByProjectKey(sourceJIRAHOST, sourceProjectKey));
 		
 		//遍历参数中传入的project role的用户列表
 		Set<Entry<String, List<Map<String, String>>>> usersSet = users.entrySet();
@@ -249,26 +256,16 @@ public class SynchronizeProjectRole {
 					if (postJSONString != null && destinationRestUrl != null) {
 						HttpResponse httpResponse = HttpMethod.getPostMethodWithAuthorPostJson(CDCADMIN, CDC_PWD, destinationRestUrl, postJSONString);
 						
-						
-						
 						System.out.println(usernameOrGroupname+"加入的状态:  "+httpResponse.getStatusLine().getStatusCode());
 					}
 				}
 			}
 		}
-		return flag;
 	}
 	
-	
-	
-	public static void main(String[] args) {
-		
-		 
-		 Map<String, String> projectRolesList = SynchronizeProjectRole.getRolesByProjectKey(JIRA_INT,"SWT");
-		 
-		 Map<String, List<Map<String, String>>> allUsersFromProjectRoles = SynchronizeProjectRole.getAllUsersFromProjectRoles(projectRolesList);
-		 
-		 addUsersToProjectRoles(allUsersFromProjectRoles, JIRA_INT, "RDTH");
+	public static void main(String[] args) {	 
+			 
+		addUsersToProjectRoles(JIRA_INT,"SWT", JIRA_INT, "RDTH");
 		
 	}
 	

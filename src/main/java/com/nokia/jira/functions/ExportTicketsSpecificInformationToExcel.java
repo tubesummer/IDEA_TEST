@@ -60,7 +60,8 @@ public class ExportTicketsSpecificInformationToExcel {
 				String sheetName = "Verifying Lead Auditor List";
 				
 				if (!CreateExcelFile.fileExist(fileDir)) {
-					CreateExcelFile.createExcel(fileDir, sheetName, row);
+					//首先创建Excel 文件和sheet
+					CreateExcelFile.createExcelXls(fileDir, sheetName, row);
 					List<Map<String,String>> AuditorsList = new ArrayList<Map<String,String>>();
 					
 					Map<String, String> ticket = null;
@@ -104,7 +105,7 @@ public class ExportTicketsSpecificInformationToExcel {
 					
 //					System.out.println(AuditorsList.size());
 					try {
-						CreateExcelFile.writeToExcel(fileDir, sheetName, AuditorsList);
+						CreateExcelFile.writeToExcelXls(fileDir, sheetName, AuditorsList);
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -123,7 +124,6 @@ public class ExportTicketsSpecificInformationToExcel {
 					response.releaseConnection();
 				}
 			}
-			
 		}
 	}
 }

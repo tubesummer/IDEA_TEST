@@ -14,10 +14,17 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+
 
 
 
@@ -29,7 +36,8 @@ import org.apache.poi.ss.usermodel.CellType;
  */
 public class CreateExcelFile {
 	
-	private static HSSFWorkbook workbook = null; 
+	private static HSSFWorkbook hWorkbook = null; 
+	private static XSSFWorkbook xssfWorkbook = null;
 	
     /** 
      * 判断文件是否存在. 
@@ -48,7 +56,7 @@ public class CreateExcelFile {
      * @param sheetName  表格索引名 
      * @return boolean
      */      
-    public static boolean sheetExist(String fileDir, String sheetName){
+    public static boolean XlsSheetExist(String fileDir, String sheetName){
     	
     	 boolean flag = false;  
          File file = new File(fileDir); 
@@ -56,9 +64,9 @@ public class CreateExcelFile {
          if (file.exists()) {
 			 //文件存在，创建workbook        	 
         	 try {
-				workbook = new HSSFWorkbook(new FileInputStream(file));
-				//添加worksheet(不添加worksheet时生成的xls文件打开时会报错)
-				HSSFSheet sheet = workbook.getSheet(sheetName);				
+				hWorkbook = new HSSFWorkbook(new FileInputStream(file));
+				
+				HSSFSheet sheet = hWorkbook.getSheet(sheetName);				
 				if (sheet!=null) {					
 					flag = true;
 				}				
@@ -74,32 +82,38 @@ public class CreateExcelFile {
     }
     
     /**
-     * 创建新excel.
+     * 创建新excel(xls).
      * @param fileDir excel的路径 
      * @param sheetName 要创建的表格索引 
      * @param titleRow  excel的第一行即表格头
      */
-    public static void createExcel(String fileDir, String sheetName, String titleRow[]){
+    public static void createExcelXls(String fileDir, String sheetName, String titleRow[]){
     	
     	//创建workbook
-    	workbook = new HSSFWorkbook();
-    	
+    	hWorkbook = new HSSFWorkbook();
     	//添加Worksheet（不添加sheet时生成的xls文件打开时会报错)
-    	HSSFSheet sheet = workbook.createSheet(sheetName);
+    	hWorkbook.createSheet(sheetName);
     	
     	//新建文件
     	FileOutputStream fileOutputStream = null;
     	
     	try {
 			//添加表头, 创建第一行
-			HSSFRow row = workbook.getSheet(sheetName).createRow(0);
+			HSSFRow row = hWorkbook.getSheet(sheetName).createRow(0);
 			
 			for (short i = 0; i < titleRow.length; i++) {
-				HSSFCell cell = row.createCell(i,CellType.BLANK);
+				
+				HSSFCell cell = row.createCell(i, CellType.BLANK);
+				
+				CellStyle cellStyle = hWorkbook.createCellStyle();
+				cellStyle.setAlignment(HorizontalAlignment.LEFT);
+				
+				cellStyle.setFillBackgroundColor(HSSFColor.ORANGE.index);
+				
 				cell.setCellValue(titleRow[i]);
 			}
 			fileOutputStream = new FileOutputStream(fileDir);
-			workbook.write(fileOutputStream);
+			hWorkbook.write(fileOutputStream);
 			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -139,20 +153,20 @@ public class CreateExcelFile {
      } 
     
     /** 
-     * 往excel中写入(已存在的数据无法写入). 
+     * 往excel(xls)中写入(已存在的数据无法写入). 
      * @param fileDir    文件路径 
      * @param sheetName  表格索引 
      * @param object 
      * @throws Exception 
      */  
     
-    public static void writeToExcel(String fileDir, String sheetName, List<Map<String,String>> mapList) throws Exception{
+    public static void writeToExcelXls(String fileDir, String sheetName, List<Map<String,String>> mapList) throws Exception{
     	
     	//创建workbook
     	File file = new File(fileDir);
     	
     	try {
-			workbook = new HSSFWorkbook(new FileInputStream(file));			
+			hWorkbook = new HSSFWorkbook(new FileInputStream(file));			
 			
 		}catch(FileNotFoundException e){
 			e.printStackTrace();
@@ -163,7 +177,7 @@ public class CreateExcelFile {
     	
     	//文件流
     	FileOutputStream fileOutputStream = null;
-    	HSSFSheet sheet = workbook.getSheet(sheetName);
+    	HSSFSheet sheet = hWorkbook.getSheet(sheetName);
     	// 获取表格的总行数  
         // int rowCount = sheet.getLastRowNum() + 1; // 需要加一
     	//获取表头的列数
@@ -172,8 +186,6 @@ public class CreateExcelFile {
     	try {  
             // 获得表头行对象  
             HSSFRow titleRow = sheet.getRow(0);
-            
-//            System.out.println(titleRow+"这是表头对象");
             
             if(titleRow!=null){ 
                 for(int rowId=0;rowId<mapList.size();rowId++){
@@ -189,7 +201,7 @@ public class CreateExcelFile {
             }  
   
             fileOutputStream = new FileOutputStream(fileDir);  
-            workbook.write(fileOutputStream);  
+            hWorkbook.write(fileOutputStream);  
         } catch (Exception e) {  
             throw e;
         } finally {    
@@ -203,44 +215,56 @@ public class CreateExcelFile {
         }
     }
     
+    /**
+     * 创建Excel(xlsx)
+     * @param fileDir  文件名称及地址
+     * @param sheetName sheet的名称
+     * @param titleRow  表头
+     */
+    public static void createExcelXlsx(String fileDir, String sheetName, String titleRow[]){
+    	
+    	
+    	
+    }
+    
+    
     
     public static void main(String[] args) {
     	
-    	String fileDir = "d:\\workbook.xls";
-		
-    	//判断文件是否存在
-    	System.out.println("文件是否存在： "+CreateExcelFile.fileExist(fileDir));
-    	
-//    	if (!CreateExcelFile.fileExist(fileDir)) {
-    		//创建文件
-        	
-        	String[] title = {"id","name","password"};
-        	CreateExcelFile.createExcel(fileDir, "sheet1", title);
-        	
-        	List<Map> userList = new ArrayList<Map>();
-        	
-            Map<String,String> map=new HashMap<String,String>();
-            map.put("id", "111");
-            map.put("name", "张三");
-            map.put("password", "111！@#");
-            
-            Map<String,String> map2=new HashMap<String,String>();
-            map2.put("id", "222");
-            map2.put("name", "李四");
-            map2.put("password", "222！@#");
-            userList.add(map);
-            userList.add(map2);
-            try {
-//    			CreateExcelFile.writeToExcel(fileDir,"sheet1",userList);
-    		} catch (Exception e) {
-    			// TODO Auto-generated catch block
-    			e.printStackTrace();
-    		}
-//		}
     	
     	
-	}
-    
+    	String fileDir = "d:\\xWorkbook.xlsx";
+    	
+    	xssfWorkbook = new XSSFWorkbook();
+    	
+    	//不穿参数的话sheet名称默认是sheet0
+    	xssfWorkbook.createSheet("A");
+    	xssfWorkbook.createSheet("B");
+    	xssfWorkbook.createSheet("C");
+    	
+    	FileOutputStream fileOutputStream = null;
+    	
+    	try {
+			fileOutputStream = new FileOutputStream(new File(fileDir));
+			xssfWorkbook.write(fileOutputStream);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			if (fileOutputStream != null) {
+				
+				try {
+					fileOutputStream.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+    }
 	
 	
 }
