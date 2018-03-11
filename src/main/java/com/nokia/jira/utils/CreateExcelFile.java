@@ -87,34 +87,29 @@ public class CreateExcelFile {
      * @param sheetName 要创建的表格索引 
      * @param titleRow  excel的第一行即表格头
      */
-    public static void createExcelXls(String fileDir, String sheetName, String titleRow[]){
+    public static void createExcelXls(String fileDir, List<String> sheetNames, String titleRow[]){
     	
     	//创建workbook
     	hWorkbook = new HSSFWorkbook();
-    	//添加Worksheet（不添加sheet时生成的xls文件打开时会报错)
-    	hWorkbook.createSheet(sheetName);
-    	
     	//新建文件
     	FileOutputStream fileOutputStream = null;
-    	
+    	HSSFRow row = null;    	
     	try {
-			//添加表头, 创建第一行
-			HSSFRow row = hWorkbook.getSheet(sheetName).createRow(0);
 			
-			for (short i = 0; i < titleRow.length; i++) {
-				
-				HSSFCell cell = row.createCell(i, CellType.BLANK);
-				
-				CellStyle cellStyle = hWorkbook.createCellStyle();
-				cellStyle.setAlignment(HorizontalAlignment.LEFT);
-				
-				cellStyle.setFillBackgroundColor(HSSFColor.ORANGE.index);
-				
-				cell.setCellValue(titleRow[i]);
-			}
-			fileOutputStream = new FileOutputStream(fileDir);
-			hWorkbook.write(fileOutputStream);
-			
+    		//添加Worksheet（不添加sheet时生成的xls文件打开时会报错)
+        	for(int i = 0; i<sheetNames.size(); i++){
+        		hWorkbook.createSheet(sheetNames.get(i));
+        		hWorkbook.getSheet(sheetNames.get(i)).createRow(0);
+        		//添加表头, 创建第一行
+        		row = hWorkbook.getSheet(sheetNames.get(i)).createRow(0);
+        		for (short j = 0; j < titleRow.length; j++) {
+    				
+    				HSSFCell cell = row.createCell(j, CellType.BLANK);
+    				cell.setCellValue(titleRow[j]);
+    			}
+    			fileOutputStream = new FileOutputStream(fileDir);
+    			hWorkbook.write(fileOutputStream);
+        	}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -231,40 +226,93 @@ public class CreateExcelFile {
     
     public static void main(String[] args) {
     	
+    	String fileDir = "d:\\workbook.xls";
     	
+    	List<String> sheetName = new ArrayList<>();
     	
-    	String fileDir = "d:\\xWorkbook.xlsx";
+    	sheetName.add("A");
+    	sheetName.add("B");
+    	sheetName.add("C");
     	
-    	xssfWorkbook = new XSSFWorkbook();
+    	System.out.println(sheetName);
     	
-    	//不穿参数的话sheet名称默认是sheet0
-    	xssfWorkbook.createSheet("A");
-    	xssfWorkbook.createSheet("B");
-    	xssfWorkbook.createSheet("C");
+    	String[] title = {"id","name","password"};
+    	CreateExcelFile.createExcelXls(fileDir, sheetName, title);
     	
-    	FileOutputStream fileOutputStream = null;
-    	
-    	try {
-			fileOutputStream = new FileOutputStream(new File(fileDir));
-			xssfWorkbook.write(fileOutputStream);
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}finally {
-			if (fileOutputStream != null) {
+    	List<Map<String,String>> userList1 = new ArrayList<Map<String,String>>();
+        Map<String,String> map=new HashMap<String,String>();
+        map.put("id", "111");
+        map.put("name", "张三");
+        map.put("password", "111！@#");
+        
+        Map<String,String> map2=new HashMap<String,String>();
+        map2.put("id", "222");
+        map2.put("name", "李四");
+        map2.put("password", "222！@#");
+        
+        Map<String,String> map3=new HashMap<String,String>();
+        map3.put("id", "33");
+        map3.put("name", "王五");
+        map3.put("password", "333！@#");
+        userList1.add(map);
+        userList1.add(map2);
+        userList1.add(map3);
+        
+        Map<String, List<Map<String, String>>> users = new HashMap<>();
+        
+        users.put("A", userList1);
+        
+        List<Map<String,String>> userList2 = new ArrayList<Map<String,String>>();
+        Map<String,String> map4=new HashMap<String,String>();
+        map4.put("id", "111");
+        map4.put("name", "张三");
+        map4.put("password", "111！@#");
+        
+        Map<String,String> map5=new HashMap<String,String>();
+        map5.put("id", "222");
+        map5.put("name", "李四");
+        map5.put("password", "222！@#");
+        
+        Map<String,String> map6=new HashMap<String,String>();
+        map6.put("id", "33");
+        map6.put("name", "王五");
+        map6.put("password", "333！@#");
+        userList2.add(map4);
+        userList2.add(map5);
+        userList2.add(map6);
+        
+        users.put("B", userList2);
+        
+        List<Map<String,String>> userList3 = new ArrayList<Map<String,String>>();
+        
+        
+        users.put("C", userList3);
+        
+        System.out.println(sheetName.size());
+        
+        for(int i = 0; i< sheetName.size(); i++){
+        	
+        	if (users.get(sheetName.get(i)) == null || users.get(sheetName.get(i)).size() == 0) {
 				
-				try {
-					fileOutputStream.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+        		sheetName.remove(i);
+        		
 			}
+        }
+        
+        System.out.println(sheetName.size());
+        
+        createExcelXls(fileDir, sheetName, title);
+        for (int j = 0; j < sheetName.size(); j++) {
+        	
+        	try {
+				writeToExcelXls(fileDir, sheetName.get(j), users.get(sheetName.get(j)));
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 		}
+        
+        
     }
-	
-	
 }

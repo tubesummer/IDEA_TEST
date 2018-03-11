@@ -57,7 +57,8 @@ public class ExportTicketsSpecificInformationToExcel {
 				
 				//创建Excel文件
 				String fileDir = "d:\\Verifying Lead Auditor List.xls";
-				String sheetName = "Verifying Lead Auditor List";
+				List<String> sheetName = new ArrayList<>();
+				sheetName.add("Verifying Lead Auditor List");
 				
 				if (!CreateExcelFile.fileExist(fileDir)) {
 					//首先创建Excel 文件和sheet
@@ -105,7 +106,7 @@ public class ExportTicketsSpecificInformationToExcel {
 					
 //					System.out.println(AuditorsList.size());
 					try {
-						CreateExcelFile.writeToExcelXls(fileDir, sheetName, AuditorsList);
+						CreateExcelFile.writeToExcelXls(fileDir, sheetName.get(0), AuditorsList);
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

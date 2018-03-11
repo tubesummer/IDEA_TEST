@@ -23,6 +23,7 @@ import org.codehaus.jettison.json.JSONObject;
 
 import com.nokia.BaseHttpTools.utils.HttpMethod;
 import com.nokia.jira.utils.ConfigurationTool;
+import com.nokia.jira.utils.CreateExcelFile;
 
 /**
  * @author bpan
@@ -63,7 +64,7 @@ public class SynchronizeProjectRole {
 				BufferedReader bReader = new BufferedReader(new InputStreamReader(responseStream));
 				//字符串操作类
 				StringBuffer resBuffer = new StringBuffer();
-				String resTemp = "";
+				String resTemp = null;
 				while((resTemp = bReader.readLine()) != null){
 					
 					resBuffer.append(resTemp);
@@ -161,7 +162,8 @@ public class SynchronizeProjectRole {
 						for (int i = 0; i < jsonArray.length(); i++) {
 							role = new HashMap<String,String>();
 							JSONObject roleJsonObject = jsonArray.getJSONObject(i);
-							role.put( roleJsonObject.getString("name"),roleJsonObject.getString("type"));
+							role.put("User Name", roleJsonObject.getString("name"));
+							role.put("Type", roleJsonObject.getString("type"));
 							users.add(role);							
 						}						
 					}					
@@ -223,22 +225,18 @@ public class SynchronizeProjectRole {
 				System.out.println(role);
 				destinationRestUrl = DestinationProjectRoles.get(role);
 				//如果存在用户遍历加入
+				String type = null;
+				String usernameOrGroupname = null;
+				String postJSONString = null;
 				for (int i = 0; i < usersFromRole.size(); i++) {
 					Map<String, String> userOrGroup = usersFromRole.get(i);
 					
 					System.out.println(userOrGroup);
 					//判断存放的是user还是group
-					Set<Map.Entry<String, String>> set = userOrGroup.entrySet();
-					Iterator<Entry<String, String>> iterator = set.iterator();
-					String type = null;
-					String usernameOrGroupname = null;
-					String postJSONString = null;
-					while (iterator.hasNext()) {
-						Entry<String, String> entry = iterator.next(); 
-						
-						type = entry.getValue();
-						usernameOrGroupname = entry.getKey();						
-					}
+					usernameOrGroupname = userOrGroup.get("User Name");
+					
+					type = userOrGroup.get("Type");
+					
 					
 					System.out.println(type);
 					
@@ -263,12 +261,63 @@ public class SynchronizeProjectRole {
 		}
 	}
 	
-	public static void main(String[] args) {	 
+	public static void main(String[] args) throws Exception {	 
 			 
-		addUsersToProjectRoles(JIRA_INT,"SWT", JIRA_INT, "RDTH");
+//		addUsersToProjectRoles(JIRA_INT,"SWT", JIRA_INT, "RDTH");
 		
+		//get all users from every role of 7705 project
+		Map<String, List<Map<String, String>>> users = getAllUsersFromProjectRoles(getRolesByProjectKey(JIRA_INT, "SAR"));
+		
+		Set<Map.Entry<String, List<Map<String, String>>>> userSet = users.entrySet();
+		
+		Iterator<Entry<String, List<Map<String, String>>>> userIterator = userSet.iterator();
+		
+		List<String> sheetNames = new ArrayList<>();
+		
+		while (userIterator.hasNext()) {
+			
+			Entry<String, List<Map<String, String>>> mEntry = userIterator.next();
+			
+			String sheetName = mEntry.getKey();
+			
+			List<Map<String, String>> usersFromRole = mEntry.getValue();
+			
+			sheetNames.add(sheetName);
+		}
+		
+		
+		System.out.println(sheetNames+" sheetName的大小："+sheetNames.size());
+		
+		int account = sheetNames.size();
+		
+		List<Integer> removeIndexes = new ArrayList<>();
+		
+		for (Iterator sheetNamesIterator = sheetNames.iterator(); sheetNamesIterator.hasNext();) {
+			
+			String sheet = (String) sheetNamesIterator.next();
+			
+			
+			if ( users.get(sheet).size() == 0) {
+				
+				sheetNamesIterator.remove();
+				
+			}
+			
+		}
+		
+		System.out.println(sheetNames+" sheetName的大小："+sheetNames.size());
+		
+		String[] titleRow = {"User Name","Type"};
+		
+		String filDir = "d:\\usersFromEveryRoleOf7705.xls";
+		
+		CreateExcelFile.createExcelXls(filDir, sheetNames, titleRow);
+		
+		for (Iterator iterator = sheetNames.iterator(); iterator.hasNext();) {
+			String role = (String) iterator.next();
+			
+			CreateExcelFile.writeToExcelXls(filDir, role, users.get(role));
+			
+		}
 	}
-	
-	
-
 }
