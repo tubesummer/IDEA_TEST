@@ -9,12 +9,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.commons.collections4.Get;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.http.HttpResponse;
 import org.codehaus.jettison.json.JSONArray;
@@ -24,6 +26,7 @@ import org.codehaus.jettison.json.JSONObject;
 import com.nokia.BaseHttpTools.utils.HttpMethod;
 import com.nokia.jira.utils.ConfigurationTool;
 import com.nokia.jira.utils.CreateExcelFile;
+import com.nokia.jira.utils.ProjectRolesUtil;
 
 /**
  * @author bpan
@@ -114,6 +117,42 @@ public class SynchronizeProjectRole {
 		return projectRolesList;		
 	}
 	
+	
+	/**
+	 * 获取具体某个项目中具体某个role的
+	 * @param jiraHost
+	 * @param restUrl
+	 * @return
+	 */
+	public static Set<String> getUsersFromProjectRole(String jiraHost,String userName,String password, String projectKey, String roleName) {
+		
+		 Set<String> usersOfTheRole = new HashSet<String>();
+		
+		String roleId = ProjectRolesUtil.getRoleIdByRoleName(jiraHost, userName, password, roleName);
+		
+		String restURL = jiraHost+"/rest/api/2/project/"+projectKey+"/role/"+roleId;
+		
+		GetMethod response = HttpMethod.httpGet(userName, password, restURL);
+		
+		try {
+			InputStream inputStream = response.getResponseBodyAsStream();
+			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+			
+			
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			response.releaseConnection();
+		}
+		
+		
+		
+		return usersOfTheRole;
+	}
+	
+	
 	/**
 	 * 获取项目中每个role中users和groups
 	 * @param projectRoelsList 项目中的roles列表
@@ -164,7 +203,8 @@ public class SynchronizeProjectRole {
 							JSONObject roleJsonObject = jsonArray.getJSONObject(i);
 							role.put("User Name", roleJsonObject.getString("name"));
 							role.put("Type", roleJsonObject.getString("type"));
-							users.add(role);							
+							users.add(role);
+							
 						}						
 					}					
 				} catch (IOException e) {
@@ -266,7 +306,7 @@ public class SynchronizeProjectRole {
 //		addUsersToProjectRoles(JIRA_INT,"SWT", JIRA_INT, "RDTH");
 		
 		//get all users from every role of 7705 project
-		Map<String, List<Map<String, String>>> users = getAllUsersFromProjectRoles(getRolesByProjectKey(JIRA_INT, "SAR"));
+		/*Map<String, List<Map<String, String>>> users = getAllUsersFromProjectRoles(getRolesByProjectKey(JIRA_Prod, "IXR"));
 		
 		Set<Map.Entry<String, List<Map<String, String>>>> userSet = users.entrySet();
 		
@@ -280,17 +320,13 @@ public class SynchronizeProjectRole {
 			
 			String sheetName = mEntry.getKey();
 			
-			List<Map<String, String>> usersFromRole = mEntry.getValue();
+			mEntry.getValue();
 			
 			sheetNames.add(sheetName);
 		}
 		
 		
 		System.out.println(sheetNames+" sheetName的大小："+sheetNames.size());
-		
-		int account = sheetNames.size();
-		
-		List<Integer> removeIndexes = new ArrayList<>();
 		
 		for (Iterator sheetNamesIterator = sheetNames.iterator(); sheetNamesIterator.hasNext();) {
 			
@@ -309,7 +345,7 @@ public class SynchronizeProjectRole {
 		
 		String[] titleRow = {"User Name","Type"};
 		
-		String filDir = "d:\\usersFromEveryRoleOf7705.xls";
+		String filDir = "d:\\usersFromEveryRoleOf7250.xls";
 		
 		CreateExcelFile.createExcelXls(filDir, sheetNames, titleRow);
 		
@@ -318,6 +354,22 @@ public class SynchronizeProjectRole {
 			
 			CreateExcelFile.writeToExcelXls(filDir, role, users.get(role));
 			
-		}
+		}*/
+		
+//		addUsersToProjectRoles(JIRA_Prod, "SAR", JIRA_Prod, "IXR");
+		
+		
+		
+		List<String> teStrings = new ArrayList<>();
+		teStrings.add("A");
+		
+		teStrings.add("B");
+		
+		teStrings.add("C");
+		
+		System.out.println(teStrings);
+		
+		System.out.println(teStrings.contains("C"));
+		
 	}
 }
