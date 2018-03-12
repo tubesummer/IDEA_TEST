@@ -16,6 +16,13 @@
 	    <version>1.9</version>
 	</dependency>
 	
+	<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-collections4 -->
+	<dependency>
+	    <groupId>org.apache.commons</groupId>
+	    <artifactId>commons-collections4</artifactId>
+	    <version>4.1</version>
+	</dependency>
+	
 	<!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
 	<dependency>
 	    <groupId>org.apache.httpcomponents</groupId>
@@ -53,6 +60,8 @@
 	</dependency>
 	
 	<!-- POI(operate excel) start -->
+	
+	<!-- the following POI packages must be consistent with the version -->
     <dependency>
         <groupId>org.apache.poi</groupId>
         <artifactId>poi</artifactId>
@@ -62,8 +71,18 @@
     <dependency>
         <groupId>org.apache.poi</groupId>
         <artifactId>poi-ooxml</artifactId>
-        <version>3.9</version>
+        <version>3.17</version>
     </dependency>
+    <!-- https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml-schemas -->
+    <!-- the dependent jar package to create .xlsx file  -->
+	<dependency>
+	    <groupId>org.apache.poi</groupId>
+	    <artifactId>poi-ooxml-schemas</artifactId>
+	    <version>3.17</version>
+	</dependency>
+	
+
+	
     	
 	<!-- https://mvnrepository.com/artifact/org.apache.xmlbeans/xmlbeans -->
 	<dependency>
@@ -78,6 +97,15 @@
         <artifactId>commons-collections</artifactId>
         <version>3.2.2</version>
     </dependency>
+    
+
+    <!-- https://mvnrepository.com/artifact/dom4j/dom4j -->
+	<dependency>
+	    <groupId>dom4j</groupId>
+	    <artifactId>dom4j</artifactId>
+	    <version>1.6.1</version>
+	</dependency>
+    
     <!-- POI end -->
     
     <!-- Jason  operate program start-->
@@ -113,8 +141,8 @@
             <artifactId>maven-compiler-plugin</artifactId>  
             <version>2.3.2</version>  
             <configuration>  
-                <source>1.8</source> <!-- //对你你的jdk版本呢 -->
-                <target>1.8</target>  <!-- //对你你的jdk版本呢 -->
+                <source>1.8</source> 
+                <target>1.8</target>  
             </configuration>  
         </plugin>  
     </plugins>  
