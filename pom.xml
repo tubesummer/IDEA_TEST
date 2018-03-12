@@ -61,7 +61,7 @@
 	
 	<!-- POI(operate excel) start -->
 	
-	<!-- the following POI packages must be consistent with the version -->
+	<!-- the version of the following POI packages must be consistent -->
     <dependency>
         <groupId>org.apache.poi</groupId>
         <artifactId>poi</artifactId>
@@ -80,9 +80,6 @@
 	    <artifactId>poi-ooxml-schemas</artifactId>
 	    <version>3.17</version>
 	</dependency>
-	
-
-	
     	
 	<!-- https://mvnrepository.com/artifact/org.apache.xmlbeans/xmlbeans -->
 	<dependency>
