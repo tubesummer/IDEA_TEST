@@ -1,12 +1,62 @@
 package com.nokia.BaseHttpTools.utils;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPost;
 
 public class HttpMethod {
+	
+	
+	/**
+	 * 将响应对象转换成String 字符串
+	 * @param response
+	 * @return
+	 */
+	public static String convertResponseAsString(GetMethod response){
+		
+		InputStream inputStream = null;
+		BufferedReader bufferedReader = null;
+		StringBuffer stringBuffer = null;
+		String tempString = null;
+		try {
+			inputStream = response.getResponseBodyAsStream();
+			bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+			stringBuffer = new StringBuffer();
+			while ((tempString = bufferedReader.readLine()) != null) {
+				stringBuffer.append(tempString);
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			
+			if (bufferedReader !=null ) {
+				
+				try {
+					bufferedReader.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+			if (inputStream != null) {
+				try {
+					inputStream.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		return stringBuffer.toString();
+	}
 
     /**
 	 * 获取http请求的响应结果
