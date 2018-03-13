@@ -81,19 +81,26 @@ public class ProjectRolesUtil {
 	
 	
 	
-	
+	/**
+	 * 根据提供的Role Name获取Role ID
+	 * @param JIRAHost  JIRAURL
+	 * @param userName  用户名
+	 * @param passWord  密码
+	 * @param RoleName  
+	 * @return  Role ID
+	 */
 	public static String getRoleIdByRoleName(String JIRAHost,String userName,String passWord,String RoleName){
 		
 		String id = null;
 		
-		for (int i = 0; i < getAllRolesOfCurrentJIRASystem(userName, passWord, JIRAHost).size(); i++) {
+		List<Map<String, String>> allRoles = getAllRolesOfCurrentJIRASystem(userName, passWord, JIRAHost);
+		
+		for (int i = 0; i < allRoles.size() ; i++) {
 			
-			
-			if (getAllRolesOfCurrentJIRASystem(userName, passWord, JIRAHost).get(i).get(RoleName)!=null) {
-				id = getAllRolesOfCurrentJIRASystem(userName, passWord, JIRAHost).get(i).get(RoleName);
+			if (allRoles.get(i).get(RoleName)!=null) {
+				id = allRoles.get(i).get(RoleName);
 			}
 		}
-		
 		return id;
 	}
 	
