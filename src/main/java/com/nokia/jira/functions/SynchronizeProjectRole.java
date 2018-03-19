@@ -18,6 +18,7 @@ import java.util.Set;
 
 import org.apache.commons.collections4.Get;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.coyote.http11.filters.VoidInputFilter;
 import org.apache.http.HttpResponse;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -227,7 +228,7 @@ public class SynchronizeProjectRole {
 			
 			destinationRestUrl = DestinationProjectRoles.get(roleName);
 			
-			System.out.println(roleName);
+			System.out.println("Project Role Name :"+roleName);
 			
 			//获取目标项目中该role的user list
 			Set<String> destinationRoleusers = getUsersFromProjectRole(destinationJITAHOST, destinationUserName, destinationPassword, destinationProjectKey, roleName);
@@ -269,15 +270,14 @@ public class SynchronizeProjectRole {
 			}
 		}
 	}
+
 	
-	public static void main(String[] args) throws Exception {	 
-			 
-		addUsersToProjectRoles(JIRA_Prod, CDCADMIN, CDC_PWD, "SAR", JIRA_Prod, CDCADMIN, CDC_PWD, "IXR");;
-		
-		//get all users from every role of 7705 project
-		/*Map<String, List<Map<String, String>>> users = getAllUsersFromProjectRoles(CDCADMIN,CDC_PWD,getRolesByProjectKey(JIRA_INT, CDCADMIN,CDC_PWD, "RDTH"));
-		
-		System.out.println(users);
+	/**
+	 * 将某个项目的所有project role 的users 导入到Excel中
+	 * @param fileDir  导入文件地址
+	 * @param users  该项目中所有
+	 */
+	public static void exportProjectRolesUserListToExcel(String fileDir, Map<String, List<Map<String, String>>> users){
 		
 		Set<Map.Entry<String, List<Map<String, String>>>> userSet = users.entrySet();
 		
@@ -298,23 +298,33 @@ public class SynchronizeProjectRole {
 		
 		String[] titleRow = {"User Name","Type"};
 		
-		String filDir = "d:\\usersFromEveryRoleOfRDTH.xls";
 		
-		CreateExcelFile.createExcelXls(filDir, sheetNames, titleRow);
+		CreateExcelFile.createExcelXls(fileDir, sheetNames, titleRow);
 		
 		for (Iterator iterator = sheetNames.iterator(); iterator.hasNext();) {
 			String role = (String) iterator.next();
 			
-			CreateExcelFile.writeToExcelXls(filDir, role, users.get(role));
+			try {
+				CreateExcelFile.writeToExcelXls(fileDir, role, users.get(role));
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			
-		}*/
+		}
+	}
+	
+	
+	
+	
+	public static void main(String[] args) throws Exception {	 
+			 
+//		addUsersToProjectRoles(JIRA_Prod, CDCADMIN, CDC_PWD, "SAR", JIRA_Prod, CDCADMIN, CDC_PWD, "IXR");
 		
-//		addUsersToProjectRoles(JIRA_Prod, "SAR", JIRA_Prod, "IXR");
+		//get all users from every role of 7705 project
 		
+		exportProjectRolesUserListToExcel("d:\\SWT users.xls", getAllUsersFromProjectRoles(CDCADMIN, CDC_PWD, getRolesByProjectKey(JIRA_INT, CDCADMIN, CDC_PWD, "SWT")));
 		
-//		System.out.println(getRolesByProjectKey(JIRA_INT, CDCADMIN, CDC_PWD, "SWT"));
-		
-//		System.out.println(getUsersFromProjectRole(JIRA_INT, CDCADMIN, CDC_PWD, "RDTH", "Administrators"));
 			
 	}
 }
