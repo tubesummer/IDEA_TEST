@@ -221,7 +221,7 @@ public class SynchronizeProjectRole {
 			Entry<String, List<Map<String, String>>> mEntry = usersIterator.next();
 			//获取需要遍历的user list集合
 			usersFromRole = mEntry.getValue();
-			System.out.println(usersFromRole);
+//			System.out.println(usersFromRole);
 			//获取role Name
 			roleName = mEntry.getKey();
 			
@@ -231,7 +231,7 @@ public class SynchronizeProjectRole {
 			
 			//获取目标项目中该role的user list
 			Set<String> destinationRoleusers = getUsersFromProjectRole(destinationJITAHOST, destinationUserName, destinationPassword, destinationProjectKey, roleName);
-			System.out.println(destinationRoleusers);
+//			System.out.println(destinationRoleusers);
 			
 			//如果存在用户遍历加入
 			String type = null;
@@ -239,8 +239,7 @@ public class SynchronizeProjectRole {
 			String postJSONString = null;
 			for (int i = 0; i < usersFromRole.size(); i++) {
 				Map<String, String> userOrGroup = usersFromRole.get(i);
-				
-				System.out.println(userOrGroup);
+//				System.out.println(userOrGroup);
 				
 				usernameOrGroupname = userOrGroup.get("User Name");
 				
@@ -250,12 +249,12 @@ public class SynchronizeProjectRole {
 					
 					//拼接postJasonString
 					if ("atlassian-user-role-actor".equals(type)) {
-						postJSONString = "{ \"user\" : [\""+usernameOrGroupname+"\"] }";	
+						postJSONString = "{ \"user\" : [\""+usernameOrGroupname.trim().toLowerCase()+"\"] }";	
 					}else if ("atlassian-group-role-actor".equals(type)) {
-						postJSONString = "{ \"group\" : [\""+usernameOrGroupname+"\"] }";
+						postJSONString = "{ \"group\" : [\""+usernameOrGroupname.trim().toLowerCase()+"\"] }";
 					}
 					System.out.println("postJSONString----->"+postJSONString);
-					System.out.println(destinationRestUrl);
+//					System.out.println(destinationRestUrl);
 					
 					
 					
@@ -273,7 +272,7 @@ public class SynchronizeProjectRole {
 	
 	public static void main(String[] args) throws Exception {	 
 			 
-		addUsersToProjectRoles(JIRA_INT, CDCADMIN, CDC_PWD, "RDTH", JIRA_INT, CDCADMIN, CDC_PWD, "SWT");;
+		addUsersToProjectRoles(JIRA_Prod, CDCADMIN, CDC_PWD, "SAR", JIRA_Prod, CDCADMIN, CDC_PWD, "IXR");;
 		
 		//get all users from every role of 7705 project
 		/*Map<String, List<Map<String, String>>> users = getAllUsersFromProjectRoles(CDCADMIN,CDC_PWD,getRolesByProjectKey(JIRA_INT, CDCADMIN,CDC_PWD, "RDTH"));
